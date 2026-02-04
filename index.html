@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아사쿠사 미쿠지 - 벚꽃 에디션</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        :root {
+            --primary-pink: #FF8BA7;
+            --deep-pink: #FF5D8F;
+            --soft-cream: #FFFCF2;
+            --sakura-white: #FFE4E1;
+            --lantern-red: #E53935;
+            --wood-brown: #8D6E63;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            /* 핑크빛 하늘 배경 */
+            background: linear-gradient(180deg, #ffe6eb 0%, #ffd1dc 100%);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #555;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 벚꽃 효과 (개수 증가) */
+        .sakura-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 20; /* 맨 위로 */
+            overflow: hidden;
+        }
+
+        .petal {
+            position: absolute;
+            background-color: #FFB7C5;
+            border-radius: 150% 0 150% 0;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+
+        /* 메인 컨테이너 */
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--soft-cream);
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(255, 93, 143, 0.2);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden; /* 배경 그림이 튀어나가지 않게 */
+            min-height: 700px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 5px solid var(--primary-pink);
+            z-index: 10;
+        }
+
+        /* === [CSS 그림] 아사쿠사 배경 아트 === */
+        .asakusa-art {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* 컨텐츠 뒤로 */
+            pointer-events: none;
+            opacity: 0.9;
+        }
+
+        /* 지붕 */
+        .art-roof {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            height: 60px;
+            background: var(--wood-brown);
+            border-radius: 30px 30px 5px 5px;
+            box-shadow: 0 5px 0 #5D4037;
+        }
+        .art-roof::before { /* 지붕 장식 */
+            content: ""; position: absolute; top: 10px; left: 20px; right: 20px; height: 5px; background: #A1887F; border-radius: 5px;
+        }
+
+        /* 기둥 */
+        .art-pillar {
+            position: absolute;
+            top: 80px;
+            width: 25px;
+            height: 180px;
+            background: var(--lantern-red);
+            border-radius: 5px;
+        }
+        .p-left { left: 60px; }
+        .p-right { right: 60px; }
+
+        /* 대형 제등 (카미나리몬) */
+        .art-lantern {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 180px;
+            background: var(--lantern-red);
+            border-radius: 40px;
+            border-top: 10px solid #333;
+            border-bottom: 20px solid #D4AF37; /* 금색 장식 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        /* 제등 줄무늬 */
+        .art-lantern::before {
+            content: "";
+            position: absolute;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(transparent, transparent 30px, rgba(0,0,0,0.1) 30px, rgba(0,0,0,0.1) 32px);
+            border-radius: 40px;
+        }
+        /* 제등 글씨 */
+        .lantern-kanji {
+            font-family: 'Gowun Batang', serif;
+            font-size: 3.5rem;
+            color: #000;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.3);
+            z-index: 1;
+        }
+
+        /* 벚꽃 나무 (배경) */
+        .art-tree {
+            position: absolute;
+            bottom: 0;
+            width: 120px;
+            height: 150px;
+        }
+        .t-left { left: -30px; }
+        .t-right { right: -30px; transform: scaleX(-1); }
+
+        .tree-trunk {
+            position: absolute;
+            bottom: 0; left: 50%;
+            width: 15px; height: 100px;
+            background: var(--wood-brown);
+            border-radius: 5px;
+        }
+        .tree-leaves {
+            position: absolute;
+            bottom: 60px; left: 10px;
+            width: 100px; height: 100px;
+            background: #FFB7C5;
+            border-radius: 50%;
+            box-shadow: 20px -10px 0 #FFC1CC, -20px 10px 0 #FFCDD2;
+        }
+
+        /* === 컨텐츠 스타일 === */
+        h1 {
+            font-family: 'Jua', sans-serif;
+            color: var(--deep-pink);
+            font-size: 2.8rem;
+            margin: 180px 0 10px; /* 그림 아래로 밀기 */
+            text-shadow: 2px 2px 0 #FFF;
+            position: relative;
+            z-index: 5;
+        }
+
+        .desc {
+            color: #888;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-family: 'Jua', sans-serif;
+            position: relative;
+            z-index: 5;
+        }
+
+        .scene {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 5; /* 배경 위로 */
+        }
+        
+        .scene.active { 
+            display: flex; 
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* 통 흔들기 스타일 (귀엽게 수정) */
+        .omikuji-cylinder {
+            width: 110px;
+            height: 200px;
+            background: #FFF;
+            border: 4px solid var(--primary-pink);
+            border-radius: 20px;
+            position: relative;
+            margin: 10px auto 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 5px 5px 0 rgba(255, 93, 143, 0.1);
+            transform-origin: bottom center;
+        }
+        
+        .omikuji-cylinder::before { /* 육각 뚜껑 느낌 */
+            content: "";
+            position: absolute; top: -15px;
+            width: 90px; height: 20px;
+            background: var(--primary-pink);
+            border-radius: 10px;
+        }
+
+        .omikuji-text {
+            font-family: 'Jua', sans-serif;
+            font-size: 2.5rem;
+            color: var(--deep-pink);
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+        }
+
+        .shake-action { animation: tiltShake 0.6s ease-in-out infinite; }
+        @keyframes tiltShake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-20deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .btn {
+            background-color: var(--deep-pink);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Jua', sans-serif;
+            transition: all 0.2s;
+            box-shadow: 0 5px 0 #C2185B;
+        }
+        .btn:hover { transform: translateY(-3px); background-color: #FF4081; }
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* 제비 스타일 */
+        .sticks-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            height: 180px;
+            align-items: flex-end;
+        }
+        .stick {
+            width: 25px; height: 150px;
+            background: #FFF;
+            border: 3px solid var(--wood-brown);
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(-50px);
+            animation: stickDrop 0.5s ease forwards;
+        }
+        .stick::after { /* 끝부분 빨강 */
+            content: ""; position: absolute; bottom: 5px; left: 2px; right: 2px; height: 30px; 
+            background: var(--deep-pink); border-radius: 5px;
+        }
+        .stick:hover { transform: translateY(-20px) !important; background: #FFF0F5; }
+        @keyframes stickDrop { to { opacity: 1; transform: translateY(0); } }
+
+        /* 서랍장 */
+        .drawer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin: 10px auto;
+            background: var(--wood-brown);
+            padding: 10px;
+            border-radius: 15px;
+            width: 90%;
+        }
+        .drawer {
+            height: 35px;
+            background: #FFF;
+            color: var(--wood-brown);
+            border-radius: 5px;
+            font-family: 'Jua';
+            font-size: 1rem;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+        .drawer.target {
+            border: 2px solid var(--deep-pink);
+            color: var(--deep-pink);
+            animation: pulse 1s infinite;
+        }
+
+        /* 결과 종이 */
+        .paper {
+            width: 85%;
+            background: #FFF;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px dashed var(--primary-pink);
+            margin-bottom: 10px;
+            margin-top: 100px; /* 그림 피하기 */
+        }
+        .fortune-rank {
+            font-family: 'Jua', serif;
+            font-size: 3rem; margin: 10px 0; color: var(--deep-pink);
+        }
+        .fortune-text { font-size: 1.1rem; line-height: 1.6; margin: 15px 0; font-weight: 500; }
+
+        /* 액운 묶기 영역 */
+        #bad-luck-action {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 5px;
+            border: 2px solid var(--primary-pink);
+        }
+        
+        /* 묶는 기둥 스타일 */
+        .wires-frame {
+            position: relative; width: 100%; height: 120px; margin: 10px 0;
+            display: flex; justify-content: space-between;
+        }
+        .pillar {
+            width: 12px; height: 100%; background: var(--lantern-red); border-radius: 10px;
+        }
+        .wires-container {
+            position: absolute; top: 0; left: 12px; right: 12px; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-evenly;
+        }
+        .wire {
+            width: 100%; height: 3px; background: #CCC;
+        }
+        .tied-paper {
+            width: 35px; height: 10px; background: #FFF;
+            position: absolute; top: 50%; border: 1px solid #ddd;
+            transform: translateY(-50%) rotate(-5deg);
+        }
+        .tied-paper::before, .tied-paper::after {
+            content: ""; position: absolute; background: #FFF; width: 10px; height: 25px; top: 3px; border: 1px solid #ddd;
+        }
+        .tied-paper::before { left: -3px; transform: rotate(30deg); }
+        .tied-paper::after { right: -3px; transform: rotate(-30deg); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes fall {
+            0% { opacity: 0; top: -10%; transform: translateX(0) rotate(0deg); }
+            20% { opacity: 1; }
+            100% { opacity: 0; top: 100%; transform: translateX(30px) rotate(180deg); }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="sakura-container" id="sakura-container"></div>
+
+    <div class="container">
+        <!-- 배경 아트 (CSS 그림) -->
+        <div class="asakusa-art">
+            <!-- 지붕 -->
+            <div class="art-roof"></div>
+            <!-- 왼쪽 기둥 -->
+            <div class="art-pillar p-left"></div>
+            <!-- 오른쪽 기둥 -->
+            <div class="art-pillar p-right"></div>
+            <!-- 제등 (카미나리몬) -->
+            <div class="art-lantern">
+                <span class="lantern-kanji">雷門</span>
+            </div>
+            <!-- 벚꽃 나무 -->
+            <div class="art-tree t-left">
+                <div class="tree-leaves"></div>
+                <div class="tree-trunk"></div>
+            </div>
+            <div class="art-tree t-right">
+                <div class="tree-leaves"></div>
+                <div class="tree-trunk"></div>
+            </div>
+        </div>
+
+        <!-- Scene 1: Start -->
+        <div id="scene-start" class="scene active">
+            <h1>오늘의 운세</h1>
+            <p class="desc">핑크빛 행운이 가득!<br>통을 흔들어보세요!</p>
+            <div class="omikuji-cylinder" id="box">
+                <span class="omikuji-text">運勢</span>
+            </div>
+            <button class="btn" onclick="startShaking()">운세통 흔들기</button>
+        </div>
+
+        <!-- Scene 2: Choose Stick -->
+        <div id="scene-stick" class="scene">
+            <h1 style="margin-top:100px;">제비 뽑기</h1> <!-- 그림 피하기 위해 마진 조정 -->
+            <p class="desc">가장 마음에 드는 걸로 쏙!</p>
+            <div class="sticks-container">
+                <div class="stick" onclick="pickStick(this)" style="animation-delay: 0.1s"></div>
+                <div class="stick" onclick="pickStick(this)" style="animation-delay: 0.3s"></div>
+                <div class="stick" onclick="pickStick(this)" style="animation-delay: 0.0s"></div>
+                <div class="stick" onclick="pickStick(this)" style="animation-delay: 0.2s"></div>
+                <div class="stick" onclick="pickStick(this)" style="animation-delay: 0.15s"></div>
+            </div>
+        </div>
+
+        <!-- Scene 3: Open Drawer -->
+        <div id="scene-drawer" class="scene">
+            <h1 style="margin-top:100px;">서랍 열기</h1>
+            <p class="desc"><b id="stick-num-display" style="color:var(--deep-pink); font-size:1.5rem;"></b>번 서랍을 찾아주세요!</p>
+            <div class="drawer-grid" id="drawer-grid"></div>
+        </div>
+
+        <!-- Scene 4: Result -->
+        <div id="scene-result" class="scene">
+            <div class="paper" id="result-paper">
+                <div style="border-bottom: 2px dashed #FFB7C5; padding-bottom:5px; margin-bottom:10px;">
+                    <span style="font-family: 'Jua'; color:#888;">No. <span id="result-num"></span></span>
+                </div>
+                <div class="fortune-rank" id="fortune-rank">대길</div>
+                <p class="fortune-text" id="fortune-text">
+                    기다리던 소식이 오고<br>기쁨이 넘치는 하루입니다.
+                </p>
+                <div style="font-size: 1rem; color: #555; background: #FFF0F5; padding: 8px; border-radius: 10px;">
+                    <b>🌸 행운템:</b> <span id="lucky-item">부적</span>
+                </div>
+            </div>
+            
+            <!-- 액운 묶기 영역 -->
+            <div id="bad-luck-action" class="hidden">
+                <p style="font-family:'Jua'; color: var(--wood-brown); margin: 0 0 10px 0;">
+                    나쁜 운은 여기에 묶어두고,<br>가벼운 마음으로 가세요!
+                </p>
+                
+                <div class="wires-frame">
+                    <div class="pillar"></div>
+                    <div class="wires-container" id="wires-container"></div>
+                    <div class="pillar"></div>
+                </div>
+
+                <button class="btn" id="tie-btn" onclick="tieBadLuck()">
+                    꼭꼭 묶어두기
+                </button>
+            </div>
+
+            <button class="btn" id="retry-btn" onclick="location.reload()" style="margin-top: 15px; background-color: #81D4FA; box-shadow: 0 5px 0 #29B6F6;">
+                다시 하기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 벚꽃 대폭발! 개수 늘림
+        function createSakura() {
+            const container = document.getElementById('sakura-container');
+            const petalCount = 60; // 30개 -> 60개로 2배 증가
+            for (let i = 0; i < petalCount; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                const size = Math.random() * 10 + 8 + 'px'; // 꽃잎 크기 약간 키움
+                petal.style.width = size; petal.style.height = size;
+                petal.style.left = Math.random() * 100 + '%';
+                petal.style.animationDuration = Math.random() * 4 + 3 + 's'; // 천천히 떨어지게
+                petal.style.animationDelay = Math.random() * 5 + 's';
+                container.appendChild(petal);
+            }
+        }
+        createSakura();
+
+        const fortunes = [
+            { type: "대길 (大吉)", text: "어머! 오늘은 최고의 날이에요! 🌸<br>원하던 모든 일이 이루어질 거예요.", item: "핑크색 립밤", isBad: false },
+            { type: "길 (吉)", text: "기분 좋은 일이 생길 거예요.<br>노력한 만큼 반짝반짝 빛날 거예요.", item: "새 다이어리", isBad: false },
+            { type: "중길 (中吉)", text: "마음이 편안한 하루예요.<br>따뜻한 차 한 잔의 여유를 즐겨보세요.", item: "밀크티", isBad: false },
+            { type: "소길 (小吉)", text: "작고 귀여운 행운이 찾아와요.<br>길 가다 예쁜 꽃을 발견할지도?", item: "달콤한 사탕", isBad: false },
+            { type: "흉 (凶)", text: "오늘은 조금 조심하는 게 좋겠어요.<br>하지만 걱정 마세요!<br>여기에 묶어두고 가면 액운 끝!", item: "손수건", isBad: true }
+        ];
+
+        let selectedNumber = 0;
+        let selectedFortune = {};
+        let wires = [];
+
+        function initWires() {
+            const container = document.getElementById('wires-container');
+            for (let i = 0; i < 3; i++) { 
+                const wire = document.createElement('div');
+                wire.className = 'wire';
+                container.appendChild(wire);
+                wires.push(wire);
+
+                const initialPapers = Math.floor(Math.random() * 3) + 2;
+                for (let j = 0; j < initialPapers; j++) {
+                    createTiedPaper(wire, true);
+                }
+            }
+        }
+        initWires();
+
+        function createTiedPaper(wireElement, isInitial = false) {
+            const paper = document.createElement('div');
+            paper.className = 'tied-paper';
+            
+            const leftPos = Math.floor(Math.random() * 80) + 10;
+            const rotate = Math.random() * 30 - 15;
+            paper.style.left = leftPos + '%';
+            paper.style.transform = `translateY(-50%) rotate(${rotate}deg)`;
+
+            if (isInitial) {
+                paper.style.opacity = '1';
+            } else {
+                paper.style.opacity = '0';
+                paper.style.transform = `translateY(-50%) scale(3)`;
+            }
+            wireElement.appendChild(paper);
+            return paper;
+        }
+
+        function showScene(sceneId) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(sceneId).classList.add('active');
+        }
+
+        function startShaking() {
+            const box = document.getElementById('box');
+            box.classList.add('shake-action');
+            setTimeout(() => {
+                box.classList.remove('shake-action');
+                showScene('scene-stick');
+            }, 1500);
+        }
+
+        function pickStick(element) {
+            selectedNumber = Math.floor(Math.random() * 25) + 1;
+            // 50% 확률로 흉
+            if (Math.random() < 0.5) {
+                selectedFortune = fortunes[4];
+            } else {
+                const goodIndex = Math.floor(Math.random() * 4);
+                selectedFortune = fortunes[goodIndex];
+            }
+            
+            element.style.transform = "translateY(-40px) rotate(10deg)";
+            element.style.background = "#FFC1CC";
+            setTimeout(() => {
+                document.getElementById('stick-num-display').innerText = selectedNumber;
+                createDrawers(selectedNumber);
+                showScene('scene-drawer');
+            }, 600);
+        }
+
+        function createDrawers(targetNum) {
+            const grid = document.getElementById('drawer-grid');
+            grid.innerHTML = '';
+            for(let i=1; i<=25; i++) {
+                const drawer = document.createElement('div');
+                drawer.className = 'drawer';
+                drawer.innerText = i;
+                if(i === targetNum) {
+                    drawer.onclick = () => openResult();
+                    drawer.classList.add('target');
+                } else {
+                    drawer.onclick = () => {
+                        drawer.style.backgroundColor = "#FF8BA7";
+                        drawer.style.color = "#fff";
+                        setTimeout(() => {
+                            drawer.style.backgroundColor = "#FFF";
+                            drawer.style.color = "#8D6E63";
+                        }, 200);
+                    };
+                }
+                grid.appendChild(drawer);
+            }
+        }
+
+        function openResult() {
+            document.getElementById('result-num').innerText = selectedNumber;
+            document.getElementById('fortune-rank').innerText = selectedFortune.type;
+            document.getElementById('fortune-text').innerHTML = selectedFortune.text;
+            document.getElementById('lucky-item').innerText = selectedFortune.item;
+
+            const badLuckArea = document.getElementById('bad-luck-action');
+            const retryBtn = document.getElementById('retry-btn');
+            
+            if(selectedFortune.isBad) {
+                document.getElementById('fortune-rank').style.color = "#888"; 
+                badLuckArea.classList.remove('hidden');
+                retryBtn.style.display = 'none';
+            } else {
+                document.getElementById('fortune-rank').style.color = "var(--deep-pink)";
+                badLuckArea.classList.add('hidden');
+                retryBtn.style.display = 'inline-block';
+            }
+            showScene('scene-result');
+        }
+
+        function tieBadLuck() {
+            const resultPaper = document.getElementById('result-paper');
+            const tieBtn = document.getElementById('tie-btn');
+
+            resultPaper.style.transition = "all 0.8s ease";
+            resultPaper.style.transform = "scale(0.1) translateY(100px)";
+            resultPaper.style.opacity = "0";
+            tieBtn.style.display = 'none';
+
+            const randomWireIndex = Math.floor(Math.random() * wires.length);
+            const newPaper = createTiedPaper(wires[randomWireIndex], false);
+
+            setTimeout(() => {
+                newPaper.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.2)";
+                newPaper.style.opacity = '1';
+                newPaper.style.transform = `translateY(-50%) rotate(${Math.random() * 20 - 10}deg) scale(1)`;
+                
+                const actionArea = document.getElementById('bad-luck-action');
+                actionArea.querySelector('p').innerText = "액운이 사라졌습니다! 🌸";
+                actionArea.querySelector('p').style.color = "var(--deep-pink)";
+                document.getElementById('retry-btn').style.display = 'inline-block';
+            }, 800);
+        }
+    </script>
+</body>
+</html>
